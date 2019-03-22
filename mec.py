@@ -1,6 +1,6 @@
+import numpy as np
 
 dic={}
-
 f = open("data.txt", "r")
 auxiliar=""
 for x in f:
@@ -20,4 +20,8 @@ for i in dic:
             except ValueError:
                 p=0;
 
-print(dic["*MATERIALS"][1][0]-1000)
+def calcMRigidez(E,A,l,ponto1,ponto2):
+
+
+
+print(dic["*ELEMENT_GROUPS"][1][0])
