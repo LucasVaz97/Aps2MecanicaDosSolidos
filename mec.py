@@ -37,4 +37,30 @@ def calcMRigidez(e,a,l,pontoA,pontoB):
     M = M.round(7)
     return ((e*a/l)*M)
 
-def Gauss(u, F, M, tolerancia, loopN)
+def Gauss(u, F, M, tolerancia, loopN):
+
+    uv = np.array([[0.0],[0.0],[0.0]]) ######UV TEM QUE SER DO TAMANHO DE U, PREENCHIDO COM 0
+
+    checkt2 = 0
+    loop = 0
+
+    while(True and (loop < loopN)):
+        index = 0
+        checkt1 = 0
+        for i in range(len(M)):
+            soma=0
+            for j in range(len(M[i])):
+                soma += M[i][j]*u[j][0]
+            uv[i][0] = u[i][0]
+            u[i][0] = ( F[i][0] - soma + u[i][0] * M[i][index] ) / M[i][index]
+            index += 1
+            if(loop > 0):
+                check = (u[i][0] - uv[i][0]) / u[i][0]
+                if(check > checkt1):
+                    checkt1 = check
+        if(loop > 0):
+            checkt2 = checkt1
+            if(checkt2 < tolerancia):
+                break
+
+        loop += 1
