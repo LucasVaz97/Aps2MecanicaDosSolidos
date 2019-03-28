@@ -68,3 +68,5 @@ def Gauss(F, M, tolerancia, loopN):
                 break
 
         loop += 1
+
+    return u
