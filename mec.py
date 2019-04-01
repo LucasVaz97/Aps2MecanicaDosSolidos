@@ -151,6 +151,46 @@ def calcGauss(F, M, tolerance, loopN):
 
     return u
 
+def calcJacobi(F, M, tolerance, loopN):
+
+    u = [0]*len(M[0])
+    uv = [0]*len(M[0])
+
+    checkt2 = 0
+    loop = 0
+
+    while(True and (loop < loopN)):
+
+        index = 0
+        checkt1 = 0
+
+        for i in range(len(M)):
+            _sum = 0
+
+            uv[i] = u[i]
+
+            for j in range(len(M[i])):
+                _sum += M[i][j]*uv[j]
+
+            
+            u[i] = (F[i] - _sum + uv[i] * M[i][index]) / M[i][index]
+            index += 1
+
+            if(loop > 0):
+                check = (u[i] - uv[i]) / u[i]
+
+                if(check > checkt1):
+                    checkt1 = check
+
+        if(loop > 0):
+            checkt2 = checkt1
+
+            if(checkt2 < tolerance):
+                break
+
+        loop += 1
+
+    return u
 
 def makePointList(coordinates, incidences):
 
@@ -181,7 +221,6 @@ def makeLib(incidences):  # [[1,2,3,4],[3,4,5,6],[5,6,1,2]
         nisbe=[]
         for j in range(len(incidences[i])):
             if(j>0):
-                #print(incidences[i][j])
                 for k in range(2):
                     if(k==0):
                         nisbe.append((incidences[i][j]*2)-1)
@@ -363,5 +402,15 @@ def main():
 #main()
 dic = readDic("data.txt")
 incidences = dic["*INCIDENCES"]
-makeLib(incidences)
 
+
+M = np.array([[1.59e8,-0.40e8,-0.54e8],
+                [-0.40e8,1.70e8,0.40e8],
+                [-0.54e8,0.40e8,0.54e8],])
+
+F=np.array([[0.0],[150.0],[-100]])
+
+u = calcGauss(F, M, 0.005, 10)
+uv = calcJacobi(F, M, 0.005, 10)
+
+print(u,uv)
