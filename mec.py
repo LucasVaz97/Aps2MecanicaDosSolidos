@@ -177,20 +177,18 @@ def makePointList(coordinates, incidences):
 def makeLib(incidences):  # [[1,2,3,4],[3,4,5,6],[5,6,1,2]
 
     lib = []
-    #print(incidences)
+    # print(incidences)
     for i in range(len(incidences)):
-        nisbe=[]
+        nisbe = []
         for j in range(len(incidences[i])):
-            if(j>0):
-                #print(incidences[i][j])
+            if(j > 0):
+                # print(incidences[i][j])
                 for k in range(2):
-                    if(k==0):
+                    if(k == 0):
                         nisbe.append((incidences[i][j]*2)-1)
                     else:
                         nisbe.append((incidences[i][j]*2))
-                
-                    
-                    
+
         lib.append(nisbe)
 
     return lib
@@ -393,8 +391,7 @@ def main():
     makeExitFile("saida.txt", u, strains, stresses, rForces, u_template)  # !
 
 
-#main()
+# main()
 dic = readDic("data.txt")
 incidences = dic["*INCIDENCES"]
 makeLib(incidences)
-
