@@ -1,3 +1,4 @@
+from anastruct import SystemElements
 import numpy as np
 import math as m
 
@@ -216,19 +217,17 @@ def makePointList(coordinates, incidences):
 def makeLib(incidences):  # [[1,2,3,4],[3,4,5,6],[5,6,1,2]
 
     lib = []
-    #print(incidences)
+    # print(incidences)
     for i in range(len(incidences)):
-        nisbe=[]
+        nisbe = []
         for j in range(len(incidences[i])):
             if(j>0):
                 for k in range(2):
-                    if(k==0):
+                    if(k == 0):
                         nisbe.append((incidences[i][j]*2)-1)
                     else:
                         nisbe.append((incidences[i][j]*2))
-                
-                    
-                    
+
         lib.append(nisbe)
 
     return lib
@@ -353,15 +352,37 @@ def makeExitFile(filename, u, strains, stresses, rForces, u_template):
     file.write("\n"+"*REACTION_FORCES\n")
 
 
+def plotGraph(point_list):
+    ss = SystemElements(EA=15000, EI=5000)
+
+    for i in range(len(point_list)):
+        ss.add_element(location=[point_list[i][0], point_list[i][1]])
+
+    ss.show_structure()
+
+
+def makeDisplacedCoordinates(coordinates, u):
+
+    displaced_coordinates = []
+
+    for i in range(len(coordinates)):
+
+        line = []
+
+        if(i == 0):
+            line.append(coordinates[i])
+        else:
+
+            line.append(coordinates[i][0])
+            line.append(coordinates[i][1] + u[(i*2)-2])
+            line.append(coordinates[i][2] + u[(i*2)-1])
+
+        displaced_coordinates.append(line)
+
+    return displaced_coordinates
+
+
 def main():
-
-    # M = np.array([[1.59e8,-0.40e8,-0.54e8],
-    #            [-0.40e8,1.70e8,0.40e8],
-    #            [-0.54e8,0.40e8,0.54e8],])
-
-    # F=np.array([[0.0],[150.0],[-100]])
-
-    # u = calcGauss(F, M, 0.005, 10)+[10]
 
     dic = readDic("data.txt")
     coordinates = dic["*COORDINATES"]
@@ -373,9 +394,11 @@ def main():
 
     point_list = makePointList(coordinates, incidences)
 
+    plotGraph(point_list)
+
     listM = makeRigidMatrixList(point_list, incidences, materials, geometric)
 
-    lib = makeLib(incidences)  # !
+    lib = makeLib(incidences)
 
     calcGlobal = createGlobal(listM, lib, restrictions)
     globalM = calcGlobal[0]
@@ -396,21 +419,12 @@ def main():
     stresses = calcsns[1]
     rForces = makeReactionForces(u, globalM)  # !
 
+    displaced_coordinates = makeDisplacedCoordinates(coordinates, u)
+    displaced_point_list = makePointList(displaced_coordinates, incidences)
+
+    plotGraph(displaced_point_list)
+
     makeExitFile("saida.txt", u, strains, stresses, rForces, u_template)  # !
 
 
-#main()
-dic = readDic("data.txt")
-incidences = dic["*INCIDENCES"]
-
-
-M = np.array([[1.59e8,-0.40e8,-0.54e8],
-                [-0.40e8,1.70e8,0.40e8],
-                [-0.54e8,0.40e8,0.54e8],])
-
-F=np.array([[0.0],[150.0],[-100]])
-
-u = calcGauss(F, M, 0.005, 10)
-uv = calcJacobi(F, M, 0.005, 10)
-
-print(u,uv)
+# main()
