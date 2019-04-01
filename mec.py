@@ -190,8 +190,8 @@ def makeLib(incidences):  # [[1,2,3,4],[3,4,5,6],[5,6,1,2]
                 
                     
                     
-        lib.append(benis)
-        
+        lib.append(nisbe)
+
     return lib
 
 
