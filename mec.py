@@ -327,11 +327,16 @@ def makeDisplacedCoordinates(coordinates, u):
     displaced_coordinates = []
 
     for i in range(len(coordinates)):
+
         line = []
 
-        line.append(coordinates[i][0])
-        line.append(coordinates.append[i][1] + u[(i*2)-2])
-        line.append(coordinates.append[i][2] + u[(i*2)-1])
+        if(i == 0):
+            line.append(coordinates[i])
+        else:
+
+            line.append(coordinates[i][0])
+            line.append(coordinates[i][1] + u[(i*2)-2])
+            line.append(coordinates[i][2] + u[(i*2)-1])
 
         displaced_coordinates.append(line)
 
@@ -339,14 +344,6 @@ def makeDisplacedCoordinates(coordinates, u):
 
 
 def main():
-
-    # M = np.array([[1.59e8,-0.40e8,-0.54e8],
-    #            [-0.40e8,1.70e8,0.40e8],
-    #            [-0.54e8,0.40e8,0.54e8],])
-
-    # F=np.array([[0.0],[150.0],[-100]])
-
-    # u = calcGauss(F, M, 0.005, 10)+[10]
 
     dic = readDic("data.txt")
     coordinates = dic["*COORDINATES"]
@@ -362,7 +359,7 @@ def main():
 
     listM = makeRigidMatrixList(point_list, incidences, materials, geometric)
 
-    lib = makeLib(incidences)  # !
+    lib = makeLib(incidences)
 
     calcGlobal = createGlobal(listM, lib, restrictions)
     globalM = calcGlobal[0]
@@ -392,6 +389,3 @@ def main():
 
 
 # main()
-dic = readDic("data.txt")
-incidences = dic["*INCIDENCES"]
-makeLib(incidences)
