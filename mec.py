@@ -1,86 +1,94 @@
 import numpy as np
 import math as m
 
-def calcProdutoEscalar(p1, p2, vetor):
-	u1 = vetor[0]
-	v1 = vetor[1]
-	u2 = vetor[2]
-	v2 = vetor[3]
-	x = abs(p1[0] - p2[0])
-	y = abs(p1[1] - p2[1])
-	h = (x**2 + y**2)**(1/2)
-	CS = [0,0,0,0]
-	CS[0] = -(x/h)
-	CS[1] = -(y/h)
-	CS[2] = (x/h)
-	CS[3] = (y/h)
-	resultado = 0
-	for i in range(4):
-		resultado += vetor[i]*CS[i]
-	return resultado
 
-def retornaglobalpronta(matrizes,grausLib,restricao):
+def calcScalar(p1, p2, vector):
 
-	NoX = []
-	NoY = []
+    u1 = vector[0]
+    v1 = vector[1]
+    u2 = vector[2]
+    v2 = vector[3]
+    x = abs(p1[0] - p2[0])
+    y = abs(p1[1] - p2[1])
+    h = (x**2 + y**2)**(1/2)
 
-	for i in range(len(grausLib)):
-		for j in range(len(restricao)):
-			if restricao[j][0] in grausLib[i]:
-				if restricao[j][1] == 1:
-					if restricao[j][0] not in NoX:
-						NoX.append(restricao[j][0])
-				else:
-					if restricao[j][0] not in NoY:
-						NoY.append(restricao[j][0])
+    CS = [0, 0, 0, 0]
+    CS[0] = -(x/h)
+    CS[1] = -(y/h)
+    CS[2] = (x/h)
+    CS[3] = (y/h)
 
-	tamanho = len(set(list(np.concatenate(grausLib))))
+    result = 0
+    for i in range(4):
+        result += vector[i]*CS[i]
 
-	Global = np.zeros((tamanho, tamanho), dtype='float')
+    return result
 
-	for i in range(len(matrizes)):
-		for x in range(len(matrizes[i])):
-			for y in range(len(matrizes[i])):
-				Global[grausLib[i][y] - 1, grausLib[i][x] - 1] += matrizes[i][y,x]
 
-	NoX = np.array(NoX)
-	NoX -= 1
-	NoY = np.array(NoY)
-	NoY -= 1
+def createGlobal(matrices, lib, restriction):
 
-	lista = []
-	lista_temporaria = []
-	NoX += 1
-	NoY += 1
+    NoX = []
+    NoY = []
 
-	No = list(set(np.concatenate([NoX,NoY])))
+    for i in range(len(lib)):
+        for j in range(len(restriction)):
+            if restriction[j][0] in lib[i]:
+                if restriction[j][1] == 1:
+                    if restriction[j][0] not in NoX:
+                        NoX.append(restriction[j][0])
+                else:
+                    if restriction[j][0] not in NoY:
+                        NoY.append(restriction[j][0])
+
+    size = len(set(list(np.concatenate(lib))))
+
+    Global = np.zeros((size, size), dtype='float')
+
+    for i in range(len(matrices)):
+        for x in range(len(matrices[i])):
+            for y in range(len(matrices[i])):
+                Global[lib[i][y] - 1, lib[i][x] - 1] += matrices[i][y, x]
+
+    NoX = np.array(NoX)
+    NoX -= 1
+    NoY = np.array(NoY)
+    NoY -= 1
+
+    _list = []
+    t_list = []
+    NoX += 1
+    NoY += 1
+
+    No = list(set(np.concatenate([NoX, NoY])))
+
     old_global = Global
-	Global = np.delete(Global, No, 0)
-	Global = np.delete(Global, No, 1)
+    Global = np.delete(Global, No, 0)
+    Global = np.delete(Global, No, 1)
 
-	for i in (list(set(list(np.concatenate(grausLib))))):
+    for i in (list(set(list(np.concatenate(lib))))):
 
-		if i not in NoX:
-			lista_temporaria.append(1)
-		else:
-			lista_temporaria.append(0)
+        if i not in NoX:
+            t_list.append(1)
+        else:
+            t_list.append(0)
 
-		if len(lista_temporaria) == 2:
-			lista.append(lista_temporaria)
-			lista_temporaria = []
+        if len(t_list) == 2:
+            _list.append(t_list)
+            t_list = []
 
-	return old_global, Global, lista
+    return old_global, Global, _list
+
 
 def readDic(filename):
     dic = {}
     f = open(filename, "r")
-    auxiliar = ""
+    aux = ""
     for x in f:
         if(x[0] == "*"):
-            auxiliar = x.rstrip()
-            dic[auxiliar] = []
+            aux = x.rstrip()
+            dic[aux] = []
         if(x[0] != '*'):
-            dic[auxiliar].append(x.rstrip())
+            dic[aux].append(x.rstrip())
     for i in dic:
         for j in range(len(dic[i])):
             dic[i][j] = dic[i][j].split()
@@ -92,10 +100,10 @@ def readDic(filename):
     return dic
 
 
-def calcMRigidez(e, a, l, pontoA, pontoB):
-    alfa = m.atan2(pontoB[1]-pontoA[1], pontoB[0]-pontoA[0])
-    c = m.cos(alfa)
-    s = m.sin(alfa)
+def calcMRigid(e, a, l, pointA, pointB):
+    alpha = m.atan2(pointB[1]-pointA[1], pointB[0]-pointA[0])
+    c = m.cos(alpha)
+    s = m.sin(alpha)
     M = np.array([[c**2, c*s, -c**2, -c*s],
                   [c*s, s**2, -c*s, -s**2],
                   [-c**2, -c*s, c**2, c*s],
@@ -104,7 +112,7 @@ def calcMRigidez(e, a, l, pontoA, pontoB):
     return ((e*a/l)*M)
 
 
-def calcGauss(F, M, tolerancia, loopN):
+def calcGauss(F, M, tolerance, loopN):
 
     u = [0]*len(M[0])
     uv = [0]*len(M[0])
@@ -116,15 +124,15 @@ def calcGauss(F, M, tolerancia, loopN):
 
         index = 0
         checkt1 = 0
-        
+
         for i in range(len(M)):
-            soma = 0
+            _sum = 0
 
             for j in range(len(M[i])):
-                soma += M[i][j]*u[j]
+                _sum += M[i][j]*u[j]
 
             uv[i] = u[i]
-            u[i] = (F[i][0] - soma + u[i] * M[i][index]) / M[i][index]
+            u[i] = (F[i] - _sum + u[i] * M[i][index]) / M[i][index]
             index += 1
 
             if(loop > 0):
@@ -132,24 +140,25 @@ def calcGauss(F, M, tolerancia, loopN):
 
                 if(check > checkt1):
                     checkt1 = check
-                    
+
         if(loop > 0):
             checkt2 = checkt1
 
-            if(checkt2 < tolerancia):
+            if(checkt2 < tolerance):
                 break
 
         loop += 1
 
     return u
 
+
 def makePointList(coordinates, incidences):
 
     point_list = []
-    
+
     for i in range(len(incidences)):
 
-        indexA = int(incidences[i][1]) 
+        indexA = int(incidences[i][1])
         indexB = int(incidences[i][2])
 
         incidence_list = []
@@ -163,7 +172,8 @@ def makePointList(coordinates, incidences):
 
     return point_list
 
-def makeLib(incidences):
+
+def makeLib(incidences):  # [[1,2,3,4],[3,4,5,6],[5,6,1,2]]
 
     lib = []
 
@@ -171,19 +181,21 @@ def makeLib(incidences):
 
     for i in range(len(incidences)):
 
-        indexA = int(incidences[i][1]) 
+        indexA = int(incidences[i][1])
         indexB = int(incidences[i][2])
 
         incidence_list = []
+        incidence_list.append()
+        j += 1
 
     return lib
-    
 
 
-def makeRigidMatrixList(point_list, incidences, materials, geometric): ## [[[1,1][2,2]][[3,3][4,4]]]
+# [[[1,1][2,2]][[3,3][4,4]]]
+def makeRigidMatrixList(point_list, incidences, materials, geometric):
 
     listM = []
-    
+
     for i in range(len(incidences)):
 
         pointA = point_list[i][0]
@@ -192,13 +204,14 @@ def makeRigidMatrixList(point_list, incidences, materials, geometric): ## [[[1,1
         e = materials[i+1][0]
         a = geometric[i+1][0]
         l = m.hypot(pointB[0] - pointA[0], pointB[1] - pointA[1])
-        
-        listM.append(calcMRigidez(e, a, l, pointA, pointB))
+
+        listM.append(calcMRigid(e, a, l, pointA, pointB))
 
     return listM
 
+
 def calcStrainsNStresses(point_list, incidences, materials, u):
-    
+
     strains = []
     stresses = []
 
@@ -211,7 +224,7 @@ def calcStrainsNStresses(point_list, incidences, materials, u):
 
         e = materials[i+1][0]
         l = m.hypot(pointB[0] - pointA[0], pointB[1] - pointA[1])
-        
+
         indexA = int(incidences[i][1]) - 1
         indexB = int(incidences[i][2]) - 1
 
@@ -220,20 +233,49 @@ def calcStrainsNStresses(point_list, incidences, materials, u):
         up.append(u[indexB][0])
         up.append(u[indexB][1])
 
-        x = calcProdutoEscalar(pointA, pointB, up) ####
+        x = calcScalar(pointA, pointB, up)
 
         strains.append(x/l)
         stresses.append(x*e/l)
 
     return strains, stresses
 
+
 def makeLoads(loads, u_template):
 
     F = []
 
+    for i in range(len(u_template)):
+        hasAppended1 = False
+        hasAppended2 = False
+
+        for j in range(len(loads)):
+            if(u_template[i][0] == 1):
+
+                if((loads[j][0] == i+1) and (loads[j][1] == 1)):
+
+                    if(not hasAppended1):
+                        F.append(loads[j][2])
+                        hasAppended1 = True
+
+            if(u_template[i][1] == 1):
+
+                if((loads[j][0] == i+1) and (loads[j][1] == 2)):
+
+                    if(not hasAppended2):
+                        F.append(loads[j][2])
+                        hasAppended2 = True
+
+        if(not hasAppended1 and u_template[i][0] == 1):
+            F.append(0)
+
+        if(not hasAppended2 and u_template[i][1] == 1):
+            F.append(0)
+
     return F
 
-def makeReactionForces():
+
+def makeReactionForces(u, globalM):
 
     rForces = []
 
@@ -241,14 +283,15 @@ def makeReactionForces():
 
 
 def finalU(ut, u_template):
-    
+
     u = []
-     #preenche a matriz u corretamente no formato u = [[1, 2], [3, 4]]
+    # preenche a matriz u corretamente no formato u = [[1, 2], [3, 4]]
     return u
 
-def makeExitFile(filename, u, strains, stresses, forces):
-    
-    file = open(filename,"w")
+
+def makeExitFile(filename, u, strains, stresses, rForces, u_template):
+
+    file = open(filename, "w")
     file.write("*DISPLACEMENTS\n")
     j = 1
     for i in range(len(u)):
@@ -266,16 +309,17 @@ def makeExitFile(filename, u, strains, stresses, forces):
         j += 1
     file.write("\n"+"*REACTION_FORCES\n")
 
+
 def main():
 
-    #M = np.array([[1.59e8,-0.40e8,-0.54e8],
+    # M = np.array([[1.59e8,-0.40e8,-0.54e8],
     #            [-0.40e8,1.70e8,0.40e8],
     #            [-0.54e8,0.40e8,0.54e8],])
 
-    #F=np.array([[0.0],[150.0],[-100]])
+    # F=np.array([[0.0],[150.0],[-100]])
 
-    #u = calcGauss(F, M, 0.005, 10)+[10]
-    
+    # u = calcGauss(F, M, 0.005, 10)+[10]
+
     dic = readDic("data.txt")
     coordinates = dic["*COORDINATES"]
     incidences = dic["*INCIDENCES"]
@@ -288,27 +332,28 @@ def main():
 
     listM = makeRigidMatrixList(point_list, incidences, materials, geometric)
 
-    lib = makeLib(incidences) #!
+    lib = makeLib(incidences)  # !
 
-    calcGlobal = retornaglobalpronta(listM, lib, restrictions)
+    calcGlobal = createGlobal(listM, lib, restrictions)
     globalM = calcGlobal[0]
     globalMrestricted = calcGlobal[1]
     u_template = calcGlobal[2]
 
-    F = makeLoads(loads, u_template) #!
+    F = makeLoads(loads, u_template)
 
-    tolerancia = 0.005
+    tolerance = 0.005
     loopN = 10
 
-    ut = calcGauss(F, globalMrestricted, tolerancia, loopN)
-    
-    u = finalU(ut, u_template) #! 
+    ut = calcGauss(F, globalMrestricted, tolerance, loopN)
+
+    u = finalU(ut, u_template)  # !
 
     calcsns = calcStrainsNStresses(point_list, incidences, materials, u)
     strains = calcsns[0]
     stresses = calcsns[1]
-    rForces = makeReactionForces(u, globalM) #!
+    rForces = makeReactionForces(u, globalM)  # !
 
-    makeExitFile("saida.txt", u, strains, stresses, rForces) #!
+    makeExitFile("saida.txt", u, strains, stresses, rForces, u_template)  # !
+
 
 main()
