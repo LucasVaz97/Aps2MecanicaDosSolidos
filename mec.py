@@ -1,3 +1,4 @@
+from anastruct import SystemElements
 import numpy as np
 import math as m
 
@@ -310,6 +311,31 @@ def makeExitFile(filename, u, strains, stresses, rForces, u_template):
     file.write("\n"+"*REACTION_FORCES\n")
 
 
+def plotGraph(point_list):
+    ss = SystemElements(EA=15000, EI=5000)
+
+    for i in range(len(point_list)):
+        ss.add_element(location=[point_list[i][0], point_list[i][1]])
+
+    ss.show_structure()
+
+
+def makeDisplacedCoordinates(coordinates, u):
+
+    displaced_coordinates = []
+
+    for i in range(len(coordinates)):
+        line = []
+
+        line.append(coordinates[i][0])
+        line.append(coordinates.append[i][1] + u[(i*2)-2])
+        line.append(coordinates.append[i][2] + u[(i*2)-1])
+
+        displaced_coordinates.append(line)
+
+    return displaced_coordinates
+
+
 def main():
 
     # M = np.array([[1.59e8,-0.40e8,-0.54e8],
@@ -329,6 +355,8 @@ def main():
     loads = dic["*LOADS"][1:]
 
     point_list = makePointList(coordinates, incidences)
+
+    plotGraph(point_list)
 
     listM = makeRigidMatrixList(point_list, incidences, materials, geometric)
 
@@ -352,6 +380,11 @@ def main():
     strains = calcsns[0]
     stresses = calcsns[1]
     rForces = makeReactionForces(u, globalM)  # !
+
+    displaced_coordinates = makeDisplacedCoordinates(coordinates, u)
+    displaced_point_list = makePointList(displaced_coordinates, incidences)
+
+    plotGraph(displaced_point_list)
 
     makeExitFile("saida.txt", u, strains, stresses, rForces, u_template)  # !
 
