@@ -1,26 +1,44 @@
 import numpy as np
 
-restricao = np.array([[1,1], 
-					  [2,1], 
-					  [2,2]])
+restricao = np.array([[1,1], # 1
+					  [2,1], # 2
+					  [2,2]]) #3
 grausLib = np.array([[1,2,3,4],
 					 [3,4,5,6],
 					 [5,6,1,2]])
 
-matrizes = np.array([[[1.59,-0.40,-0.54,3],
-					  [-0.40, 1.70,0.40,2],
-					  [-0.54,0.40,0.54,7],
-					  [-0.54,0.40,0.54,7]],
+matrizes = np.array([
+	# [[1.59,-0.40,-0.54,3],
+	# 				  [-0.40, 1.70,0.40,2],
+	# 				  [-0.54,0.40,0.54,7],
+	# 				  [-0.54,0.40,0.54,7]],
+					[[0, 0, 0, 0],
+					[0, 1.05e8, 0, -1.05e8],
+					[0, 0, 0, 0],
+					[0, -1.05e8, 0, 1.05e8]],
+
 					  
-					 [[2.59,-8.40,-0.54,2],
-					  [-7.40,1.70,2.40,7],
-					  [-9.54,3.40,6.54,1],
-					  [-0.54,0.40,0.54,7]],
+					 # [[2.59,-8.40,-0.54,2],
+					 #  [-7.40,1.70,2.40,7],
+					 #  [-9.54,3.40,6.54,1],
+					 #  [-0.54,0.40,0.54,7]],
+
+					[[1.4e8, 0, -1.4e8, 0],
+					[0, 0, 0, 0],
+					[-1.4e8, 0, 1.4e8, 0],
+					[0, 0, 0, 0]],
 					  
-					 [[2.59,-8.40,-0.54,4],
-					  [-7.40,1.70,2.40,6],
-					  [-9.54,3.40,6.54,4],
-					  [-0.54,0.40,0.54,7]]])
+					 # [[2.59,-8.40,-0.54,4],
+					 #  [-7.40,1.70,2.40,6],
+					 #  [-9.54,3.40,6.54,4],
+					 #  [-0.54,0.40,0.54,7]]
+
+					[[0.30e8,0.40e8,-0.30e8,-0.40e8],
+					[0.40e8,0.54e8,-0.40e8,-0.54e8],
+					[-0.30e8,-0.40e8,0.30e8,0.40e8],
+					[-0.40e8,-0.54e8,0.40e8,0.54e8]]
+
+					  ])
 
 def retornaglobalpronta(matrizes,grausLib,restricao):
 
@@ -75,7 +93,51 @@ def retornaglobalpronta(matrizes,grausLib,restricao):
 
 	return global_velha, Global, lista
 
-velhinha, matrizglobal, listamatriz = (retornaglobalpronta(matrizes,grausLib,restricao))
+def retornaglobalpronta1(matrices, lib, restriction):
+
+	lib = np.array(lib).astype(int)
+
+	No = []
+
+	for i in range(len(restriction)):
+		No.append(restriction[i][0]*2 - 2 + restriction[i][1])
+
+	size = len(set(list(np.concatenate(lib))))
+
+	Global = np.zeros((size, size), dtype='float')
+
+	for i in range(len(matrices)):
+		for x in range(len(matrices[i])):
+			for y in range(len(matrices[i])):
+				Global[lib[i][y] - 1, lib[i][x] - 1] += matrices[i][y, x]
+
+	_list = []
+	t_list = []
+
+	No = np.array(No)
+
+	No -= 1
+
+	old_global = Global
+	Global = np.delete(Global, No, 0)
+	Global = np.delete(Global, No, 1)
+
+	No += 1
+
+	for i in (list(set(list(np.concatenate(lib))))):
+
+		if i not in No:
+			t_list.append(1)
+		else:
+			t_list.append(0)
+
+		if len(t_list) == 2:
+			_list.append(t_list)
+			t_list = []
+
+	return old_global, Global, _list
+
+velhinha, matrizglobal, listamatriz = (retornaglobalpronta1(matrizes,grausLib,restricao))
 
 print("Criando Matriz Global")
 print("Entradas (matrizes, lib, restricao):")
@@ -95,7 +157,7 @@ print("lista de 1s e 0s")
 print(listamatriz)
 print("\n"*2)
 
-listavalores = [2,3,1,4]
+listavalores = [0,150,-100]
 
 def calcula(vetor, matriz):
 	v = np.array(vetor)

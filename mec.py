@@ -30,18 +30,10 @@ def createGlobal(matrices, lib, restriction):
 
     lib = np.array(lib).astype(int)
 
-    NoX = []
-    NoY = []
+    No = []
 
-    for i in range(len(lib)):
-        for j in range(len(restriction)):
-            if restriction[j][0] in lib[i]:
-                if restriction[j][1] == 1:
-                    if restriction[j][0] not in NoX:
-                        NoX.append(restriction[j][0])
-                else:
-                    if restriction[j][0] not in NoY:
-                        NoY.append(restriction[j][0])
+    for i in range(len(restriction)):
+        No.append(restriction[i][0]*2 - 2 + restriction[i][1])
 
     size = len(set(list(np.concatenate(lib))))
 
@@ -52,25 +44,21 @@ def createGlobal(matrices, lib, restriction):
             for y in range(len(matrices[i])):
                 Global[lib[i][y] - 1, lib[i][x] - 1] += matrices[i][y, x]
 
-    NoX = np.array(NoX)
-    NoX -= 1
-    NoY = np.array(NoY)
-    NoY -= 1
-
     _list = []
     t_list = []
-    NoX += 1
-    NoY += 1
 
-    No = list(set(np.concatenate([NoX, NoY])))
+    No = np.array(No)
+    No -= 1
 
     old_global = Global
     Global = np.delete(Global, No, 0)
     Global = np.delete(Global, No, 1)
 
+    No += 1
+
     for i in (list(set(list(np.concatenate(lib))))):
 
-        if i not in NoX:
+        if i not in No:
             t_list.append(1)
         else:
             t_list.append(0)
@@ -265,21 +253,44 @@ def calcStrainsNStresses(point_list, incidences, materials, u):
 
         up = []
 
+        # print("DEBUG1")
+        # print(point_list[i])
+
         pointA = point_list[i][0]
         pointB = point_list[i][1]
 
         e = materials[i+1][0]
         l = m.hypot(pointB[0] - pointA[0], pointB[1] - pointA[1])
 
+        # print("D1.1")
+        # print(l)
+        # print(e)
+
+        # print("D2")
+        # print(incidences[i])
+
         indexA = int(incidences[i][1]) - 1
         indexB = int(incidences[i][2]) - 1
+
+        # print("D3")
+        # print(indexA)
+        # print(indexB)
+
+        # print("D3.1")
+        # print(u)
 
         up.append(u[indexA][0])
         up.append(u[indexA][1])
         up.append(u[indexB][0])
         up.append(u[indexB][1])
 
+        # print("D4")
+        # print(up)
+
         x = calcScalar(pointA, pointB, up)
+
+        # print("D5")
+        # print(x)
 
         strains.append(x/l)
         stresses.append(x*e/l)
