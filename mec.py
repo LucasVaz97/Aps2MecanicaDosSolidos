@@ -5,15 +5,15 @@ import math as m
 
 def calcScalar(p1, p2, vector):
 
-    x = abs(p1[0] - p2[0])
-    y = abs(p1[1] - p2[1])
+    x = (p2[0] - p1[0])
+    y = (p2[1] - p1[1])
     h = (x**2 + y**2)**(1/2)
 
     CS = [0, 0, 0, 0]
-    CS[0] = -abs(x/h)
-    CS[1] = -abs(y/h)
-    CS[2] = abs(x/h)
-    CS[3] = abs(y/h)
+    CS[0] = - (x/h)
+    CS[1] = - (y/h)
+    CS[2] = (x/h)
+    CS[3] = (y/h)
 
     return np.dot(CS, vector)
 
@@ -161,10 +161,11 @@ def calcJacobi(F, M, tolerance, loopN):
             index += 1
 
             if(loop > 0):
-                check = (u[i] - uv[i]) / u[i]
+                if u[i] != 0:
+                    check = (u[i] - uv[i]) / u[i]
 
-                if(check > checkt1):
-                    checkt1 = check
+                    if(check > checkt1):
+                        checkt1 = check
 
         if(loop > 0):
             checkt2 = checkt1
@@ -194,6 +195,7 @@ def makePointList(coordinates, incidences):
         incidence_list.append(pointB)
 
         point_list.append(incidence_list)
+        #print(point_list)
 
     return point_list
 
@@ -388,6 +390,7 @@ def plotGraph(point_list):
     ss.show_structure()
 
 
+
 def makeDisplacedCoordinates(coordinates, u):
 
     num = coordinates[0]
@@ -404,8 +407,8 @@ def makeDisplacedCoordinates(coordinates, u):
 
 
 def main():
-
-    dic = readDic("entrada.txt")
+    name = input("Nome do arquivo: ")
+    dic = readDic(name)
     coordinates = dic["*COORDINATES"]
     incidences = dic["*INCIDENCES"]
     geometric = dic["*GEOMETRIC_PROPERTIES"]
@@ -428,10 +431,13 @@ def main():
 
     F = makeLoads(loads, u_template)
 
-    tolerance = 0.005
-    loopN = 10
-
-    ut = calcGauss(F, globalMrestricted, tolerance, loopN)
+    selection = int(input("Selecione o método: Gauss(1) ou Jacobi(2): "))
+    tolerance = float(input("Tolerancia: "))
+    loopN = int(input("Numero de iterações: "))
+    if(selection == 1):
+        ut = calcGauss(F, globalMrestricted, tolerance, loopN)
+    elif(selection == 2):
+        ut = calcJacobi(F, globalMrestricted, tolerance, loopN)
 
     u = finalU(ut, u_template)
 
@@ -446,7 +452,7 @@ def main():
     plotGraph(displaced_point_list)
     plotGraphGroup(point_list, displaced_point_list)
 
-    makeExitFile("saida.txt", u, strains, stresses, rForces, u_template)
+    makeExitFile("saida.fem", u, strains, stresses, rForces, u_template)
 
 
 main()
