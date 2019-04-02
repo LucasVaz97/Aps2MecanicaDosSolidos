@@ -5,15 +5,15 @@ import math as m
 
 def calcScalar(p1, p2, vector):
 
-    x = abs(p1[0] - p2[0])
-    y = abs(p1[1] - p2[1])
+    x = (p2[0] - p1[0])
+    y = (p2[1] - p1[1])
     h = (x**2 + y**2)**(1/2)
 
     CS = [0, 0, 0, 0]
-    CS[0] = -abs(x/h)
-    CS[1] = -abs(y/h)
-    CS[2] = abs(x/h)
-    CS[3] = abs(y/h)
+    CS[0] = - (x/h)
+    CS[1] = - (y/h)
+    CS[2] = (x/h)
+    CS[3] = (y/h)
 
     return np.dot(CS, vector)
 
@@ -405,7 +405,7 @@ def makeDisplacedCoordinates(coordinates, u):
 
 def main():
 
-    dic = readDic("entrada.txt")
+    dic = readDic("data.txt")
     coordinates = dic["*COORDINATES"]
     incidences = dic["*INCIDENCES"]
     geometric = dic["*GEOMETRIC_PROPERTIES"]
