@@ -5,25 +5,30 @@ import math as m
 
 def calcScalar(p1, p2, vector):
 
-    u1 = vector[0]
-    v1 = vector[1]
-    u2 = vector[2]
-    v2 = vector[3]
+    # u1 = vector[0]
+    # v1 = vector[1]
+    # u2 = vector[2]
+    # v2 = vector[3]
     x = abs(p1[0] - p2[0])
     y = abs(p1[1] - p2[1])
     h = (x**2 + y**2)**(1/2)
 
     CS = [0, 0, 0, 0]
-    CS[0] = -(x/h)
-    CS[1] = -(y/h)
-    CS[2] = (x/h)
-    CS[3] = (y/h)
+    CS[0] = -abs(x/h)
+    CS[1] = -abs(y/h)
+    CS[2] = abs(x/h)
+    CS[3] = abs(y/h)
 
-    result = 0
-    for i in range(4):
-        result += vector[i]*CS[i]
+    # print("DEBUGOOOOOOOOOOOOOOOOOOOL")
+    # print(np.dot(CS, vector))
 
-    return result
+    return np.dot(CS, vector)
+
+    # result = 0
+    # for i in range(4):
+    #     result += vector[i]*CS[i]
+
+    # return result
 
 
 def createGlobal(matrices, lib, restriction):
@@ -292,6 +297,10 @@ def calcStrainsNStresses(point_list, incidences, materials, u):
         # print("D5")
         # print(x)
 
+        # print("D6")
+        # print(x/l)
+        # print(x*e/l)
+
         strains.append(x/l)
         stresses.append(x*e/l)
 
@@ -389,7 +398,7 @@ def makeExitFile(filename, u, strains, stresses, rForces, u_template):
     file.write("\n"+"*REACTION_FORCES\n")
     for i in range(len(rForces)):
         for j in range(len(rForces[i])):
-            if rForces[i][j] != 0:
+            if u_template[i][j] == 0:
                 file.write(str(i + 1) + " ")
                 if j == 0:
                     file.write("FX = ")
@@ -399,11 +408,17 @@ def makeExitFile(filename, u, strains, stresses, rForces, u_template):
                 file.write("\n")
 
 
-def plotGraph(point_list):
-    ss = SystemElements(EA=15000, EI=5000)
+def initss():
+    return SystemElements(EA=15000, EI=5000)
+
+def plotGraph(ss, point_list):
 
     for i in range(len(point_list)):
         ss.add_element(location=[point_list[i][0], point_list[i][1]])
+
+    return ss
+
+def showstruct(ss):
 
     ss.show_structure()
 
@@ -435,7 +450,8 @@ def main():
 
     point_list = makePointList(coordinates, incidences)
 
-    plotGraph(point_list)
+    sus = initss()
+    sus = plotGraph(sus, point_list)
 
     listM = makeRigidMatrixList(point_list, incidences, materials, geometric)
 
@@ -463,7 +479,11 @@ def main():
     displaced_coordinates = makeDisplacedCoordinates(coordinates, u)
     displaced_point_list = makePointList(displaced_coordinates, incidences)
 
-    plotGraph(displaced_point_list)
+    displaced_point_list = np.array(displaced_point_list)
+
+    sus = plotGraph(sus, displaced_point_list)
+
+    showstruct(sus)
 
     makeExitFile("saida.txt", u, strains, stresses, rForces, u_template)  # !
 
