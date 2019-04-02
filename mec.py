@@ -5,10 +5,6 @@ import math as m
 
 def calcScalar(p1, p2, vector):
 
-    # u1 = vector[0]
-    # v1 = vector[1]
-    # u2 = vector[2]
-    # v2 = vector[3]
     x = abs(p1[0] - p2[0])
     y = abs(p1[1] - p2[1])
     h = (x**2 + y**2)**(1/2)
@@ -19,16 +15,7 @@ def calcScalar(p1, p2, vector):
     CS[2] = abs(x/h)
     CS[3] = abs(y/h)
 
-    # print("DEBUGOOOOOOOOOOOOOOOOOOOL")
-    # print(np.dot(CS, vector))
-
     return np.dot(CS, vector)
-
-    # result = 0
-    # for i in range(4):
-    #     result += vector[i]*CS[i]
-
-    # return result
 
 
 def createGlobal(matrices, lib, restriction):
@@ -211,10 +198,9 @@ def makePointList(coordinates, incidences):
     return point_list
 
 
-def makeLib(incidences):  # [[1,2,3,4],[3,4,5,6],[5,6,1,2]
+def makeLib(incidences):
 
     lib = []
-    # print(incidences)
     for i in range(len(incidences)):
         nisbe = []
         for j in range(len(incidences[i])):
@@ -230,7 +216,6 @@ def makeLib(incidences):  # [[1,2,3,4],[3,4,5,6],[5,6,1,2]
     return lib
 
 
-# [[[1,1][2,2]][[3,3][4,4]]]
 def makeRigidMatrixList(point_list, incidences, materials, geometric):
 
     listM = []
@@ -258,48 +243,21 @@ def calcStrainsNStresses(point_list, incidences, materials, u):
 
         up = []
 
-        # print("DEBUG1")
-        # print(point_list[i])
-
         pointA = point_list[i][0]
         pointB = point_list[i][1]
 
         e = materials[i+1][0]
         l = m.hypot(pointB[0] - pointA[0], pointB[1] - pointA[1])
 
-        # print("D1.1")
-        # print(l)
-        # print(e)
-
-        # print("D2")
-        # print(incidences[i])
-
         indexA = int(incidences[i][1]) - 1
         indexB = int(incidences[i][2]) - 1
-
-        # print("D3")
-        # print(indexA)
-        # print(indexB)
-
-        # print("D3.1")
-        # print(u)
 
         up.append(u[indexA][0])
         up.append(u[indexA][1])
         up.append(u[indexB][0])
         up.append(u[indexB][1])
 
-        # print("D4")
-        # print(up)
-
         x = calcScalar(pointA, pointB, up)
-
-        # print("D5")
-        # print(x)
-
-        # print("D6")
-        # print(x/l)
-        # print(x*e/l)
 
         strains.append(x/l)
         stresses.append(x*e/l)
@@ -480,7 +438,7 @@ def main():
     calcsns = calcStrainsNStresses(point_list, incidences, materials, u)
     strains = calcsns[0]
     stresses = calcsns[1]
-    rForces = makeReactionForces(u, globalM)  # !
+    rForces = makeReactionForces(u, globalM)
 
     displaced_coordinates = makeDisplacedCoordinates(coordinates, u)
     displaced_point_list = makePointList(displaced_coordinates, incidences)
@@ -488,7 +446,7 @@ def main():
     plotGraph(displaced_point_list)
     plotGraphGroup(point_list, displaced_point_list)
 
-    makeExitFile("saida.txt", u, strains, stresses, rForces, u_template)  # !
+    makeExitFile("saida.txt", u, strains, stresses, rForces, u_template)
 
 
 main()
