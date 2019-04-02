@@ -28,6 +28,8 @@ def calcScalar(p1, p2, vector):
 
 def createGlobal(matrices, lib, restriction):
 
+    lib = np.array(lib).astype(int)
+
     NoX = []
     NoY = []
 
@@ -137,10 +139,11 @@ def calcGauss(F, M, tolerance, loopN):
             index += 1
 
             if(loop > 0):
-                check = (u[i] - uv[i]) / u[i]
+                if u[i] != 0:
+                    check = (u[i] - uv[i]) / u[i]
 
-                if(check > checkt1):
-                    checkt1 = check
+                    if(check > checkt1):
+                        checkt1 = check
 
         if(loop > 0):
             checkt2 = checkt1
@@ -318,28 +321,50 @@ def makeLoads(loads, u_template):
     return F
 
 
-def makeReactionForces(u, globalM):
+def makeReactionForces(vetor, matriz):
+    v = np.concatenate(np.array(vetor))
+    m = np.array(matriz)
+    retorna = m.dot(v)
+    listinha = []
+    retmesmo = []
+    for i in range(len(retorna)):
+        listinha.append(retorna[i])
+        if len(listinha) == 2:
+            retmesmo.append(listinha)
+            listinha = []
+    return retmesmo
 
-    rForces = []
 
-    return rForces
+def finalU(lista_de_valores, lista_de_zeros_e_uns):
+    listaReturn = []
 
+    for i in range(len(lista_de_zeros_e_uns)):
+        apenda = []
+        for j in range(len(lista_de_zeros_e_uns[i])):
+            if lista_de_zeros_e_uns[i][j] == 0:
+                apenda.append(0)
+            else:
+                apenda.append(lista_de_valores[0])
+                del lista_de_valores[0]
 
-def finalU(ut, u_template):
+        listaReturn.append(apenda)
 
-    u = []
-    # preenche a matriz u corretamente no formato u = [[1, 2], [3, 4]]
-    return u
+    return listaReturn
 
 
 def makeExitFile(filename, u, strains, stresses, rForces, u_template):
 
     file = open(filename, "w")
     file.write("*DISPLACEMENTS\n")
-    j = 1
     for i in range(len(u)):
-        file.write(str(j) + " " + str(u[i*2]) + " " + str(u[i*2+1]) + "\n")
-        j += 1
+        file.write(str(i + 1) + " ")
+        for j in range(len(u[i])):
+            file.write(str(u[i][j]))
+            if j == len(u[i]) - 1:
+                file.write("\n")
+            else:
+                file.write(" ")
+
     file.write("\n"+"*ELEMENT_STRAINS\n")
     j = 1
     for i in range(len(strains)):
@@ -351,6 +376,14 @@ def makeExitFile(filename, u, strains, stresses, rForces, u_template):
         file.write(str(j) + " " + str(stresses[i]) + "\n")
         j += 1
     file.write("\n"+"*REACTION_FORCES\n")
+    for i in range(len(rForces)):
+        file.write(str(i + 1) + " ")
+        for j in range(len(rForces[i])):
+            file.write(str(rForces[i][j]))
+            if j == len(u[i]) - 1:
+                file.write("\n")
+            else:
+                file.write(" ")
 
 
 def plotGraph(point_list):
@@ -364,23 +397,17 @@ def plotGraph(point_list):
 
 def makeDisplacedCoordinates(coordinates, u):
 
-    displaced_coordinates = []
+    num = coordinates[0]
+    coordinates = np.array(coordinates[1:])[:,1:] + u
+    lista = [num]
 
     for i in range(len(coordinates)):
+        listinha = [i + 1]
+        for j in range(len(coordinates[i])):
+            listinha.append(coordinates[i][j])
+        lista.append(listinha)
 
-        line = []
-
-        if(i == 0):
-            line.append(coordinates[i])
-        else:
-
-            line.append(coordinates[i][0])
-            line.append(coordinates[i][1] + u[(i*2)-2])
-            line.append(coordinates[i][2] + u[(i*2)-1])
-
-        displaced_coordinates.append(line)
-
-    return displaced_coordinates
+    return lista
 
 
 def main():
@@ -428,4 +455,4 @@ def main():
     makeExitFile("saida.txt", u, strains, stresses, rForces, u_template)  # !
 
 
-# main()
+main()
