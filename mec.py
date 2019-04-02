@@ -152,6 +152,7 @@ def calcGauss(F, M, tolerance, loopN):
 
     return u
 
+
 def calcJacobi(F, M, tolerance, loopN):
 
     u = [0]*len(M[0])
@@ -173,7 +174,6 @@ def calcJacobi(F, M, tolerance, loopN):
             for j in range(len(M[i])):
                 _sum += M[i][j]*uv[j]
 
-            
             u[i] = (F[i] - _sum + uv[i] * M[i][index]) / M[i][index]
             index += 1
 
@@ -192,6 +192,7 @@ def calcJacobi(F, M, tolerance, loopN):
         loop += 1
 
     return u
+
 
 def makePointList(coordinates, incidences):
 
@@ -221,7 +222,7 @@ def makeLib(incidences):  # [[1,2,3,4],[3,4,5,6],[5,6,1,2]
     for i in range(len(incidences)):
         nisbe = []
         for j in range(len(incidences[i])):
-            if(j>0):
+            if(j > 0):
                 for k in range(2):
                     if(k == 0):
                         nisbe.append((incidences[i][j]*2)-1)
@@ -337,7 +338,7 @@ def makeExitFile(filename, u, strains, stresses, rForces, u_template):
     file.write("*DISPLACEMENTS\n")
     j = 1
     for i in range(len(u)):
-        file.write(str(j) + " " + str(u[i][0]) + " " + str(u[i][1]) + "\n")
+        file.write(str(j) + " " + str(u[i*2]) + " " + str(u[i*2+1]) + "\n")
         j += 1
     file.write("\n"+"*ELEMENT_STRAINS\n")
     j = 1
