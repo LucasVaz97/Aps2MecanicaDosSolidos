@@ -377,13 +377,15 @@ def makeExitFile(filename, u, strains, stresses, rForces, u_template):
         j += 1
     file.write("\n"+"*REACTION_FORCES\n")
     for i in range(len(rForces)):
-        file.write(str(i + 1) + " ")
         for j in range(len(rForces[i])):
-            file.write(str(rForces[i][j]))
-            if j == len(u[i]) - 1:
+            if rForces[i][j] != 0:
+                file.write(str(i + 1) + " ")
+                if j == 0:
+                    file.write("FX = ")
+                elif j == 1:
+                    file.write("FY = ")
+                file.write(str(rForces[i][j]))
                 file.write("\n")
-            else:
-                file.write(" ")
 
 
 def plotGraph(point_list):
