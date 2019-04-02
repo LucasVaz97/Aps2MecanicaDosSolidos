@@ -5,25 +5,30 @@ import math as m
 
 def calcScalar(p1, p2, vector):
 
-    u1 = vector[0]
-    v1 = vector[1]
-    u2 = vector[2]
-    v2 = vector[3]
+    # u1 = vector[0]
+    # v1 = vector[1]
+    # u2 = vector[2]
+    # v2 = vector[3]
     x = abs(p1[0] - p2[0])
     y = abs(p1[1] - p2[1])
     h = (x**2 + y**2)**(1/2)
 
     CS = [0, 0, 0, 0]
-    CS[0] = -(x/h)
-    CS[1] = -(y/h)
-    CS[2] = (x/h)
-    CS[3] = (y/h)
+    CS[0] = -abs(x/h)
+    CS[1] = -abs(y/h)
+    CS[2] = abs(x/h)
+    CS[3] = abs(y/h)
 
-    result = 0
-    for i in range(4):
-        result += vector[i]*CS[i]
+    # print("DEBUGOOOOOOOOOOOOOOOOOOOL")
+    # print(np.dot(CS, vector))
 
-    return result
+    return np.dot(CS, vector)
+
+    # result = 0
+    # for i in range(4):
+    #     result += vector[i]*CS[i]
+
+    # return result
 
 
 def createGlobal(matrices, lib, restriction):
@@ -292,6 +297,10 @@ def calcStrainsNStresses(point_list, incidences, materials, u):
         # print("D5")
         # print(x)
 
+        # print("D6")
+        # print(x/l)
+        # print(x*e/l)
+
         strains.append(x/l)
         stresses.append(x*e/l)
 
@@ -389,7 +398,7 @@ def makeExitFile(filename, u, strains, stresses, rForces, u_template):
     file.write("\n"+"*REACTION_FORCES\n")
     for i in range(len(rForces)):
         for j in range(len(rForces[i])):
-            if rForces[i][j] != 0:
+            if u_template[i][j] == 0:
                 file.write(str(i + 1) + " ")
                 if j == 0:
                     file.write("FX = ")
@@ -457,27 +466,20 @@ def main():
     calcGlobal = createGlobal(listM, lib, restrictions)
     globalM = calcGlobal[0]
     globalMrestricted = calcGlobal[1]
-    print("globalMrestricted: {}".format(globalMrestricted))
     u_template = calcGlobal[2]
-    print("u_template: {}".format(u_template))
 
     F = makeLoads(loads, u_template)
-    print("F: {}".format(F))
 
     tolerance = 0.005
     loopN = 10
 
     ut = calcGauss(F, globalMrestricted, tolerance, loopN)
-    print("ut: {}".format(ut))
 
     u = finalU(ut, u_template)
-    print("u: {}".format(u))
 
     calcsns = calcStrainsNStresses(point_list, incidences, materials, u)
     strains = calcsns[0]
-    print("strains: {}".format(strains))
     stresses = calcsns[1]
-    print("stresses: {}".format(stresses))
     rForces = makeReactionForces(u, globalM)  # !
 
     displaced_coordinates = makeDisplacedCoordinates(coordinates, u)
