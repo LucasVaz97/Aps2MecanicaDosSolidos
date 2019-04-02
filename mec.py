@@ -399,6 +399,19 @@ def makeExitFile(filename, u, strains, stresses, rForces, u_template):
                 file.write("\n")
 
 
+def plotGraphGroup(point_list, displaced_point_list):
+    ss = SystemElements(EA=15000, EI=5000)
+
+    for i in range(len(point_list)):
+        ss.add_element(location=[point_list[i][0], point_list[i][1]])
+
+    for i in range(len(displaced_point_list)):
+        ss.add_element(location=[displaced_point_list[i]
+                                 [0], displaced_point_list[i][1]])
+
+    ss.show_structure()
+
+
 def plotGraph(point_list):
     ss = SystemElements(EA=15000, EI=5000)
 
@@ -411,7 +424,7 @@ def plotGraph(point_list):
 def makeDisplacedCoordinates(coordinates, u):
 
     num = coordinates[0]
-    coordinates = np.array(coordinates[1:])[:,1:] + u
+    coordinates = np.array(coordinates[1:])[:, 1:] + u
     lista = [num]
 
     for i in range(len(coordinates)):
@@ -425,7 +438,7 @@ def makeDisplacedCoordinates(coordinates, u):
 
 def main():
 
-    dic = readDic("data.txt")
+    dic = readDic("entrada.txt")
     coordinates = dic["*COORDINATES"]
     incidences = dic["*INCIDENCES"]
     geometric = dic["*GEOMETRIC_PROPERTIES"]
@@ -444,26 +457,34 @@ def main():
     calcGlobal = createGlobal(listM, lib, restrictions)
     globalM = calcGlobal[0]
     globalMrestricted = calcGlobal[1]
+    print("globalMrestricted: {}".format(globalMrestricted))
     u_template = calcGlobal[2]
+    print("u_template: {}".format(u_template))
 
     F = makeLoads(loads, u_template)
+    print("F: {}".format(F))
 
     tolerance = 0.005
     loopN = 10
 
     ut = calcGauss(F, globalMrestricted, tolerance, loopN)
+    print("ut: {}".format(ut))
 
-    u = finalU(ut, u_template)  # !
+    u = finalU(ut, u_template)
+    print("u: {}".format(u))
 
     calcsns = calcStrainsNStresses(point_list, incidences, materials, u)
     strains = calcsns[0]
+    print("strains: {}".format(strains))
     stresses = calcsns[1]
+    print("stresses: {}".format(stresses))
     rForces = makeReactionForces(u, globalM)  # !
 
     displaced_coordinates = makeDisplacedCoordinates(coordinates, u)
     displaced_point_list = makePointList(displaced_coordinates, incidences)
 
     plotGraph(displaced_point_list)
+    plotGraphGroup(point_list, displaced_point_list)
 
     makeExitFile("saida.txt", u, strains, stresses, rForces, u_template)  # !
 
